@@ -1,2 +1,2 @@
 telebot
-sqlite3==3.38
+db-sqlite3==0.0.1
