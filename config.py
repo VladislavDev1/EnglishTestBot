@@ -1,0 +1,3 @@
+# TOKEN = '7090605003:AAGyGnfwrqkm_L99ourmXr8f4Yp3uUlk_Qc'
+TOKEN = '7090605003:AAGyGnfwrqkm_L99ourmXr8f4Yp3uUlk_Qc'
+ADMIN_ID = 610691463
