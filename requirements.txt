@@ -1,2 +1,2 @@
-telebot
-db-sqlite3==0.0.1
+telebot==0.0.5
+flask

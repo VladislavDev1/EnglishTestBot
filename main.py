@@ -2,18 +2,29 @@ import random
 import telebot
 from englishDB import Database
 from DATA_LISTS_TESTS import tests, TEST2, TEST3, TEST4, TEST5
-from config import TOKEN, ADMIN_ID
+# from config import TOKEN, ADMIN_ID
 from time import sleep
 from telebot import types
-from telebot import apihelper
-
+from keep_alive import keep_alive
+import os
+keep_alive()
 
 
 
 
 # connect DB + create bot
 db = Database('english.db')
-bot = telebot.TeleBot(token=TOKEN) 
+bot = telebot.TeleBot(token=os.environ.get('TOKEN')) 
+bot.remove_webhook()
+ADMIN_ID = os.environ.get('ADMIN_ID')
+
+test_mapping = {
+    1: (TEST2, 2),
+    2: (TEST3, 3),
+    3: (TEST4, 4),
+    4: (TEST5, 5)
+}
+
 
 
 # проверка бана
@@ -49,26 +60,19 @@ def starting_test(message):
 @bot.message_handler(commands=['next'])
 def next_stage(message):
     user_id = message.chat.id
-    
+    current_status = db.get_status(user_id)
+
 # проверка бана
     if check_ban_status(user_id):
         return
-    current_status = db.get_status(user_id)
-    if current_status == 1:
-        send_test_questions(user_id, TEST2)
-        db.set_status(user_id, 2)
-    elif current_status == 2:
-        send_test_questions(user_id, TEST3)
-        db.set_status(user_id, 3)
-    elif current_status == 3:
-        send_test_questions(user_id, TEST4)
-        db.set_status(user_id, 4)
-    elif current_status == 4:
-        send_test_questions(user_id, TEST5)
-        db.set_status(user_id, 5)
+   
+    if current_status in test_mapping:
+        test, next_status = test_mapping[current_status]
+        send_test_questions(user_id, test)
+        db.set_status(user_id, next_status)
     else:
-        bot.send_message(user_id, 'Невозможно перейти к следующему этапу')
-
+        bot.send_message(user_id, 'Невозможно перейти к следующему этапу\nНачните тест /tests')
+    
 def send_test_questions(chat_id, test_data):
     random_test = random.sample(list(test_data.keys()), 5)
     markup = types.ReplyKeyboardRemove()
@@ -80,7 +84,7 @@ def send_test_questions(chat_id, test_data):
         options = question_details["options"]
 
         if answer not in options:
-            bot.send_message(chat_id, f"Ошибка в вопросе: {question_details['question']}. Правильный ответ '{answer}' не найден в списке вариантов ответа.")
+            bot.send_message(chat_id, f"Ошибка в вопросе: {question_details['question']}. Правильный ответ '{answer}' не найден в списке вариантов ответа.\nОтправьте данный тест в лс админу")
             continue
 
         correct_option_index = options.index(answer)
@@ -131,8 +135,7 @@ def handle_poll_answer(poll_answer):
         if db.get_status(user_id) == 5:
             markupProfile = types.ReplyKeyboardMarkup(resize_keyboard=True)
             btn = types.KeyboardButton("👤 Профиль")
-            btn1 = types.KeyboardButton("Изменить имя")
-            markupProfile.add(btn, btn1)
+            markupProfile.add(btn)
 
             db.increment_test_count(user_id)  # Увеличиваем счетчик завершенных тестов
             bot.send_message(user_id, f'Вы успешно завершили тест, ваши данные отправлены преподавателю!\n\nПравильных ответов: {correct_count}\nНеправильных ответов: {incorrect_count}', reply_markup=markupProfile)
@@ -259,8 +262,6 @@ def unban_user(message):
 
     else:
         bot.send_message(message.chat.id, "Вам недоступна данная команда")
-        
-    
 # ban user close
 
 
@@ -353,14 +354,13 @@ def welcome(message):
     user_id = message.chat.id
     markupProfile = types.ReplyKeyboardMarkup(resize_keyboard=True)
     btn = types.KeyboardButton("👤 Профиль")
-    btn1 = types.KeyboardButton("Изменить имя")
-    markupProfile.add(btn, btn1)
+    markupProfile.add(btn)
 # проверка бана
     if check_ban_status(user_id):
         return
     
     if user_id == ADMIN_ID:
-        bot.send_message(ADMIN_ID, 'Добрый день, сюда будет приходить статистика студентов')
+        bot.send_message(ADMIN_ID, 'Добрый день')
     else:
         
         if db.user_exist(user_id):
@@ -369,16 +369,15 @@ def welcome(message):
         else:
             bot.send_sticker(user_id, 'CAACAgIAAxkBAAEFVcRmP1fYktDsuSp917lB9SgvmSRBWgACNhYAAnJroEul2k1dhz9kKTUE')
             bot.send_message(user_id, f'Привет, {message.from_user.first_name}! Данный бот предназначен для укрепления знаний английского языка.')
-            bot.send_message(user_id, 'Чтобы начать тест, пожалуйста, введите своё имя:')
-            bot.register_next_step_handler(message, handle_name_input)
+            bot.send_message(user_id, 'Чтобы начать тест, пожалуйста, введите свои данные Имя|Фамилия|Группа:')
+            bot.register_next_step_handler(message, welcome_handler)
 
 
-def handle_name_input(message):
+def welcome_handler(message):
     user_id = message.chat.id
     markupProfile = types.ReplyKeyboardMarkup(resize_keyboard=True)
     btn = types.KeyboardButton("👤 Профиль")
-    btn1 = types.KeyboardButton("Изменить имя")
-    markupProfile.add(btn, btn1)
+    markupProfile.add(btn)
     
     if user_id == ADMIN_ID:
         bot.send_message(ADMIN_ID, 'Я не отвечаю на текст')
@@ -399,36 +398,54 @@ def handle_name_input(message):
 @bot.message_handler(content_types=['text'])
 def text(message):
 # проверка бана
+    markupProfile = types.ReplyKeyboardMarkup(resize_keyboard=True)
+    btn1 = types.KeyboardButton("Изменить имя")
+    btn = types.KeyboardButton("🔙Назад")
+    markupProfile.add(btn, btn1)
+    
     if check_ban_status(message.chat.id):
         return
     
     
-    if (message.text == '👤 Профиль'):
-        bot.send_message(message.chat.id, f'Ваш профиль:\n\n🆔 ID: {message.chat.id}\n👤 Имя: {db.get_user_name(message.chat.id)}')
+    if (message.text == '👤 Профиль'):  
+        bot.send_message(message.chat.id, f'Ваш профиль:\n\n🆔 ID: {message.chat.id}\n👤 Имя: {db.get_user_name(message.chat.id)}', reply_markup=markupProfile)
+    elif(message.text == '🔙Назад'):
+        welcome(message)
     elif (message.text == 'Изменить имя'):
         bot.send_message(message.chat.id, 'Введите новое имя:')
         bot.register_next_step_handler(message, handle_change_name)
+        
     elif(db.user_exist(message.chat.id)):
          bot.send_message(message.chat.id, 'Я не отвечаю на текст')
     else:
         bot.send_message(message.chat.id, 'Вы не зарегистрированы, нажмите /start')
 
 def handle_change_name(message):
-    if message.text == '👤 Профиль' or message.text ==  "Изменить имя":
+    markupProfile = types.ReplyKeyboardMarkup(resize_keyboard=True)
+    btn = types.KeyboardButton("👤 Профиль")
+    markupProfile.add(btn)
+    if message.text == '👤 Профиль' or message.text ==  "Изменить имя" or message.text == '🔙Назад':
         bot.send_message(message.chat.id, 'Пожалуйста введите корректное имя!!')
     else:
         user_id = message.chat.id
         new_name = message.text
         db.update_user_name(user_id, new_name)  # Обновляем имя пользователя в базе данных
-        bot.send_message(user_id, f'Ваше имя было успешно изменено на {new_name}.')
+        bot.send_message(user_id, f'Ваше имя было успешно изменено на {new_name}.', reply_markup=markupProfile)
 
 # text handler close
 
 
 
 # Запуск бота
-try:
-    bot.polling(none_stop=True, timeout=60, long_polling_timeout=60)
-except Exception as e:
-    print(f"Error occurred: {e}")
-    sleep(15)
+while True:
+    try:
+        bot.polling(none_stop=True)
+    except telebot.apihelper.ApiTelegramException as e:
+        if e.result.status_code == 502:
+            print("Got Bad Gateway error. Retrying in 15 seconds...")
+            sleep(15)
+        else:
+            raise e
+    except Exception as e:
+        print(f"Unexpected error: {e}. Retrying in 15 seconds...")
+        sleep(15)
