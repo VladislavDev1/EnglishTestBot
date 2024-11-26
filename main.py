@@ -16,7 +16,7 @@ keep_alive()
 db = Database('english.db')
 bot = telebot.TeleBot(token=os.environ.get('TOKEN')) 
 bot.remove_webhook()
-ADMIN_ID = os.environ.get('ADMIN_ID')
+ADMIN_ID = int(os.environ.get('ADMIN_ID'))
 
 test_mapping = {
     1: (TEST2, 2),
