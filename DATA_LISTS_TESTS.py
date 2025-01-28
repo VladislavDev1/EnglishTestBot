@@ -1829,7 +1829,7 @@ TEST5 ={
         "358": {
             "question": "My boss is very ..........\nnicer\nnice\nnicest\nmuch nice",
             "options": ["nicer", "nice", "nicest", "much nice"],
-            "answer": "nicest"
+            "answer": "nice"
         },
         "359": {
             "question": "Do you walk ......... take the bus to work?",
