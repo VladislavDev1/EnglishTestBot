@@ -6,13 +6,14 @@ from DATA_LISTS_TESTS import tests, TEST2, TEST3, TEST4, TEST5
 from time import sleep
 from telebot import types
 import os
-
+from dotenv import load_dotenv
+load_dotenv()
 
 
 
 # connect DB + create bot
 db = Database('english.db')
-bot = telebot.TeleBot(token=)) 
+bot = telebot.TeleBot(token=os.getenv('TOKEN')) 
 bot.remove_webhook()
 ADMIN_ID = 964928426
 
