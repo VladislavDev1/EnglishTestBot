@@ -5,9 +5,7 @@ from DATA_LISTS_TESTS import tests, TEST2, TEST3, TEST4, TEST5
 # from config import TOKEN, ADMIN_ID
 from time import sleep
 from telebot import types
-from keep_alive import keep_alive
 import os
-keep_alive()
 
 
 
