@@ -1,0 +1,6 @@
+
+venv
+englishDB copy.py
+main copy.py
+__pycache__
+test.docx
