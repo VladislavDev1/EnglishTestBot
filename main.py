@@ -12,9 +12,9 @@ import os
 
 # connect DB + create bot
 db = Database('english.db')
-bot = telebot.TeleBot(token=os.environ.get('TOKEN')) 
+bot = telebot.TeleBot(token='6811304180:AAEP8sZtqEOBl7f1PfaSFIfi0YFg_X7L2Os')) 
 bot.remove_webhook()
-ADMIN_ID = int(os.environ.get('ADMIN_ID'))
+ADMIN_ID = 964928426
 
 test_mapping = {
     1: (TEST2, 2),
