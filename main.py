@@ -6,14 +6,13 @@ from DATA_LISTS_TESTS import tests, TEST2, TEST3, TEST4, TEST5
 from time import sleep
 from telebot import types
 import os
-from dotenv import load_dotenv
-load_dotenv()
+
 
 
 
 # connect DB + create bot
 db = Database('english.db')
-bot = telebot.TeleBot(token=os.getenv('TOKEN')) 
+bot = telebot.TeleBot(token=os.getenv('TOKEN'))
 bot.remove_webhook()
 ADMIN_ID = 964928426
 
@@ -41,6 +40,7 @@ def starting_test(message):
     # проверка бана
     if check_ban_status(user_id):
         return
+    
     if db.user_exist(user_id):
         current_status = db.get_status(user_id)
         if current_status and current_status != 5:
@@ -62,8 +62,6 @@ def next_stage(message):
     current_status = db.get_status(user_id)
 
 # проверка бана
-    if check_ban_status(user_id):
-        return
    
     if current_status in test_mapping:
         test, next_status = test_mapping[current_status]
@@ -112,9 +110,6 @@ def handle_poll_answer(poll_answer):
     correct_answers = db.get_correct_answers(user_id)  # Получаем правильные ответы из базы данных
     correct_option_id = correct_answers.get(question_id)
 
-# проверка бана
-    if check_ban_status(user_id):
-        return
     
     if correct_option_id is None:
         return
@@ -199,21 +194,72 @@ def show_users_page(chat_id, users, page, message_id=None, users_per_page=10):
 def callback_user_navigation(call):
     if call.data.startswith('page_'):
         page = int(call.data.split('_')[1])
+        
         users = db.get_all_users()
         show_users_page(call.message.chat.id, users, page, message_id=call.message.message_id)
     elif call.data.startswith('user_'):
         user_id = int(call.data.split('_')[1])
+        
         user = db.get_user_by_id(user_id)
+        
+        
+        markup = types.InlineKeyboardMarkup()
+        btn = types.InlineKeyboardButton("Удалить и заблокировать", callback_data=f"delete_user_{user[0]}")
+        markup.add(btn)
+        
         if user:
+            
             user_info = (f"Имя: {user[1]}\n"
                          f"ID: {user[0]}\n"
                          f"Статус: {user[2]}\n"
                          f"Пройдено тестов: {user[3]}\n"
                          f"Правильные ответы: {user[4]}\n"
                          f"Неправильные ответы: {user[5]}")
-            bot.send_message(call.message.chat.id, user_info)
+            back_button = types.InlineKeyboardButton("⬅️ Назад", callback_data=f"page_1")
+            markup.add(back_button)
+            bot.edit_message_text(chat_id=call.message.chat.id, 
+                                  message_id=call.message.message_id, 
+                                  text=user_info, 
+                                  reply_markup=markup)
         else:
             bot.send_message(call.message.chat.id, "Пользователь не найден")
+            
+            
+            
+            
+# del user open
+@bot.callback_query_handler(func=lambda call: call.data.startswith('delete_user_'))
+def delete_user_callback(call):
+    user_id = int(call.data.split('_')[2])
+    action = call.data.split('_')[1]
+    markup = types.InlineKeyboardMarkup()
+    yes_button = types.InlineKeyboardButton("Да", callback_data=f"delete_yes_{user_id}")
+    no_button = types.InlineKeyboardButton("Нет", callback_data=f"delete_no_{user_id}")
+    markup.add(yes_button, no_button)
+    
+    bot.edit_message_text(
+        chat_id=call.message.chat.id,
+        message_id=call.message.message_id,
+        text=f"Вы уверены, что хотите удалить пользователя с ID {user_id}?",
+        reply_markup=markup
+    )
+@bot.callback_query_handler(func=lambda call: call.data.startswith('delete_yes_') or call.data.startswith('delete_no_'))
+def delete_user_confirmation(call):
+    user_id = int(call.data.split('_')[2])
+    users = db.get_all_users()
+
+    if call.data.startswith('delete_yes_'):
+        db.delete_user(user_id)
+        db.user_ban(user_id, True)
+        bot.answer_callback_query(call.id, text="Пользователь удален")
+        show_users_page(call.message.chat.id, users, 1, message_id=call.message.message_id)
+    elif call.data.startswith('delete_no_'):
+        bot.answer_callback_query(call.id, text="Удаление отменено")
+        show_users_page(call.message.chat.id, users, 1, message_id=call.message.message_id)
+
+
+# del user close
+
 # statistic user close
 
 
@@ -354,7 +400,7 @@ def welcome(message):
     markupProfile = types.ReplyKeyboardMarkup(resize_keyboard=True)
     btn = types.KeyboardButton("👤 Профиль")
     markupProfile.add(btn)
-# проверка бана
+    # проверка бана
     if check_ban_status(user_id):
         return
     

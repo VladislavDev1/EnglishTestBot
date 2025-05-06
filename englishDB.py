@@ -135,14 +135,15 @@ class Database:
     def ban_exist(self, user_id):
         with self.lock:
             cursor = self.connection.cursor()
-            cursor.execute("SELECT isBaned FROM user WHERE chat_id = ?", (user_id,))
+            cursor.execute("SELECT `is_banned` FROM `baned_users` WHERE id = ?", (user_id,))
             result = cursor.fetchone()
+            print(f"Ban check for user_id {user_id}: {result}")  # Отладочное сообщение
             return result[0] == 1 if result else False
 
     def user_ban(self, user_id, ban=True):
         with self.lock:
             cursor = self.connection.cursor()
-            cursor.execute("UPDATE user SET isBaned = ? WHERE chat_id = ?", (1 if ban else 0, user_id))
+            cursor.execute("INSERT INTO baned_users (`id`, `is_banned`) VALUES (?,?)", (user_id, 1 if ban else 0))
             self.connection.commit()
 
     def set_group(self, chat_id, group):
