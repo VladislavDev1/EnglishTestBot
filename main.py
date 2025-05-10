@@ -5,6 +5,7 @@ from DATA_LISTS_TESTS import tests, TEST2, TEST3, TEST4, TEST5
 # from config import TOKEN, ADMIN_ID
 from time import sleep
 from telebot import types
+from keyboards import admin_keyboard
 import os
 
 
@@ -147,6 +148,7 @@ def handle_poll_answer(poll_answer):
 
 # ADMIN----------------------------------------------------------------------------------------------------------------ADMIN
 
+# ВНИМАНИЕ ДАЛЬШЕ РЕАЛЗУЕТСЯ БЛОКИРОВКА И РАЗБЛОКИРОВКА ПОЛЬЗОВАТЕЛЕЙ, ПОСРЕДСТВОМ ПЕРЕБОРА ПОЛЬЗОВАТЕЛЕЙ В ИНЛАЙН КНОПКАХ
 # statistic user open
 @bot.message_handler(commands=['statistic'])
 def statistic(message):
@@ -159,11 +161,10 @@ def statistic(message):
     else:
         bot.send_message(message.chat.id, "Вам недоступна данная команда")
 
-def show_users_page(chat_id, users, page, message_id=None, users_per_page=10):
+def show_users_page(chat_id, users, page, message_id=None, users_per_page=10,):
     start_index = (page - 1) * users_per_page
     end_index = start_index + users_per_page
     users_page = users[start_index:end_index]
-    
     # user_list = "\n".join([f"<em><b>{user[1]}: статус {user[2]},</b></em>\nпройдено тестов: {user[3]},\nправильные ответы: {user[4]}\nнеправильные ответы: {user[5]}\n\n" for user in users_page])
     
     keyboard = types.InlineKeyboardMarkup()
@@ -181,49 +182,95 @@ def show_users_page(chat_id, users, page, message_id=None, users_per_page=10):
         navigation_buttons.append(types.InlineKeyboardButton("⬅️ Назад", callback_data=f"page_{page-1}"))
     if end_index < len(users):
         navigation_buttons.append(types.InlineKeyboardButton("Вперед ➡️", callback_data=f"page_{page+1}"))
-    
     if navigation_buttons:
         keyboard.add(*navigation_buttons)
     
+    # Add main menu button at the bottom
+    main_menu_button = types.InlineKeyboardButton("🏠 Главное меню", callback_data="admin_main_menu")
+    keyboard.add(main_menu_button)
+    
     if message_id:
-        bot.edit_message_text(chat_id=chat_id, message_id=message_id, text='Зарегестрированные пользователи', parse_mode='HTML', reply_markup=keyboard)
+        bot.edit_message_text(chat_id=chat_id, message_id=message_id, text="Зарегестрированные пользователи", parse_mode='HTML', reply_markup=keyboard)
     else:
         bot.send_message(chat_id, 'Зарегестрированные пользователи', parse_mode='HTML', reply_markup=keyboard)
+        
+def show_users_banned_page(chat_id, users, page, message_id=None, users_per_page=10):
+    start_index = (page - 1) * users_per_page
+    end_index = start_index + users_per_page
+    users_page = users[start_index:end_index]
+    # user_list = "\n".join([f"<em><b>{user[1]}: статус {user[2]},</b></em>\nпройдено тестов: {user[3]},\nправильные ответы: {user[4]}\nнеправильные ответы: {user[5]}\n\n" for user in users_page])
+    
+    keyboard = types.InlineKeyboardMarkup()
+    
+    for user in users_page:
+        user_button = types.InlineKeyboardButton(
+            text=f"{user[1]}",
+            callback_data=f"user_banned_{user[0]}"
+        )
+        keyboard.add(user_button)
+    
+    # Add navigation buttons
+    navigation_buttons = []
+    if page > 1:
+        navigation_buttons.append(types.InlineKeyboardButton("⬅️ Назад", callback_data=f"page_ban_{page-1}"))
+    if end_index < len(users):
+        navigation_buttons.append(types.InlineKeyboardButton("Вперед ➡️", callback_data=f"page_ban_{page+1}"))
+    if navigation_buttons:
+        keyboard.add(*navigation_buttons)
+    
+    # Add main menu button at the bottom
+    main_menu_button = types.InlineKeyboardButton("🏠 Главное меню", callback_data="admin_main_menu")
+    keyboard.add(main_menu_button)
+    
+    if message_id:
+        bot.edit_message_text(chat_id=chat_id, message_id=message_id, text='черный список', parse_mode='HTML', reply_markup=keyboard)
+    else:
+        bot.send_message(chat_id, 'черный список', parse_mode='HTML', reply_markup=keyboard)
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith('page_') or call.data.startswith('user_'))
 def callback_user_navigation(call):
-    if call.data.startswith('page_'):
+    if call.data.startswith('page_ban_'):
+        page = int(call.data.split('_')[2])
+        users = db.get_all_users()
+        show_users_banned_page(call.message.chat.id, users, page, message_id=call.message.message_id)
+    
+    elif call.data.startswith('page_'):
         page = int(call.data.split('_')[1])
-        
         users = db.get_all_users()
         show_users_page(call.message.chat.id, users, page, message_id=call.message.message_id)
+
+    elif call.data.startswith('user_banned_'):
+        user_id = int(call.data.split('_')[2])
+        user = db.get_banned_user_by_id(user_id)
+        markup = types.InlineKeyboardMarkup()
+        if user:
+            bot.answer_callback_query(call.id, text=user[1])
+            markup.add(types.InlineKeyboardButton("Разблокировать", callback_data=f"unban_user_{user[0]}"))
+            markup.add(types.InlineKeyboardButton("⬅️ Назад", callback_data=f"page_ban_1"))
+            user_info = f"ID: {user[0]}\nИмя: {user[1]}"
+            bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id, text=user_info, reply_markup=markup)
+        else:
+            bot.send_message(call.message.chat.id, "Пользователь не найден")
+
     elif call.data.startswith('user_'):
         user_id = int(call.data.split('_')[1])
-        
         user = db.get_user_by_id(user_id)
-        
-        
         markup = types.InlineKeyboardMarkup()
-        btn = types.InlineKeyboardButton("Удалить и заблокировать", callback_data=f"delete_user_{user[0]}")
-        markup.add(btn)
-        
         if user:
-            
+            bot.answer_callback_query(call.id, text=user[1])
+            markup.add(types.InlineKeyboardButton("Удалить и заблокировать", callback_data=f"delete_user_{user[0]}"))
+            markup.add(types.InlineKeyboardButton("⬅️ Назад", callback_data=f"page_1"))
             user_info = (f"Имя: {user[1]}\n"
                          f"ID: {user[0]}\n"
                          f"Статус: {user[2]}\n"
                          f"Пройдено тестов: {user[3]}\n"
                          f"Правильные ответы: {user[4]}\n"
                          f"Неправильные ответы: {user[5]}")
-            back_button = types.InlineKeyboardButton("⬅️ Назад", callback_data=f"page_1")
-            markup.add(back_button)
-            bot.edit_message_text(chat_id=call.message.chat.id, 
-                                  message_id=call.message.message_id, 
-                                  text=user_info, 
-                                  reply_markup=markup)
+            bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id, text=user_info, reply_markup=markup)
         else:
             bot.send_message(call.message.chat.id, "Пользователь не найден")
-            
+        
+       
             
             
             
@@ -243,14 +290,44 @@ def delete_user_callback(call):
         text=f"Вы уверены, что хотите удалить пользователя с ID {user_id}?",
         reply_markup=markup
     )
+@bot.callback_query_handler(func=lambda call: call.data.startswith('unban_user_'))
+def delete_user_callback(call):
+    user_id = int(call.data.split('_')[2])
+    action = call.data.split('_')[1]
+    markup = types.InlineKeyboardMarkup()
+    yes_button = types.InlineKeyboardButton("Да", callback_data=f"unban_yes_{user_id}")
+    no_button = types.InlineKeyboardButton("Нет", callback_data=f"unban_no_{user_id}")
+    markup.add(yes_button, no_button)
+    
+    bot.edit_message_text(
+        chat_id=call.message.chat.id,
+        message_id=call.message.message_id,
+        text=f"Вы уверены, что хотите удалить пользователя с ID {user_id}?",
+        reply_markup=markup
+    )
+@bot.callback_query_handler(func=lambda call: call.data.startswith('unban_yes_') or call.data.startswith('unban_no_'))
+def delete_user_confirmation(call):
+    user_id = int(call.data.split('_')[2])
+    username = db.get_user_name(user_id)
+    users = db.get_all_users()
+
+    if call.data.startswith('unban_yes_'):
+        db.user_unban(user_id)
+        bot.answer_callback_query(call.id, text="Пользователь удален")
+        show_users_page(call.message.chat.id, users, 1, message_id=call.message.message_id)
+    elif call.data.startswith('unban_no_'):
+        bot.answer_callback_query(call.id, text="Удаление отменено")
+        show_users_page(call.message.chat.id, users, 1, message_id=call.message.message_id)
+        
 @bot.callback_query_handler(func=lambda call: call.data.startswith('delete_yes_') or call.data.startswith('delete_no_'))
 def delete_user_confirmation(call):
     user_id = int(call.data.split('_')[2])
+    username = db.get_user_name(user_id)
     users = db.get_all_users()
 
     if call.data.startswith('delete_yes_'):
         db.delete_user(user_id)
-        db.user_ban(user_id, True)
+        db.user_ban(user_id, username, True )
         bot.answer_callback_query(call.id, text="Пользователь удален")
         show_users_page(call.message.chat.id, users, 1, message_id=call.message.message_id)
     elif call.data.startswith('delete_no_'):
@@ -276,11 +353,11 @@ def ban_user(message):
             return
 
         user_id = command_parts[1]
-
+        username = db.get_user_name(user_id)
         if db.ban_exist(user_id):
             bot.send_message(ADMIN_ID, 'Пользователь уже был заблокирован')
         else:
-            db.user_ban(user_id, True)
+            db.user_ban(user_id, username, True)
             user_name = db.get_user_name(user_id)
             bot.send_message(ADMIN_ID, f'Пользователь {user_name} заблокирован!')
     else:
@@ -301,7 +378,7 @@ def unban_user(message):
         if not db.ban_exist(user_id):
             bot.send_message(ADMIN_ID, 'Пользователь не был заблокирован')
         else:
-            db.user_ban(user_id, False)
+            db.user_unban(user_id)
             user_name = db.get_user_name(user_id)
             bot.send_message(ADMIN_ID, f'Пользователь {user_name} разблокирован!')
 
@@ -393,6 +470,33 @@ def confirm_delete_user(chat_id, user, message_id):
 # delete user functions close
 
 
+
+@bot.callback_query_handler(func=lambda call: call.data == 'banned')
+def show_banned_users(call):
+    banned_users = db.get_banned_users()
+    bot.answer_callback_query(call.id, text='Заблокированные пользователи')
+    if banned_users:
+        show_users_banned_page(call.message.chat.id, banned_users, 1, call.message.message_id)
+    else:
+        bot.send_message(ADMIN_ID, "Нет заблокированных пользователей")
+
+
+@bot.callback_query_handler(func=lambda call: call.data == 'users')
+def show_banned_users(call):
+    bot.answer_callback_query(call.id, text='Пользователи')
+    users = db.get_all_users()
+    if users:
+        show_users_page(call.message.chat.id, users, 1, call.message.message_id)
+    else:
+        bot.send_message(ADMIN_ID, "Нет зарегистрированных пользователей")
+
+@bot.callback_query_handler(func=lambda call: call.data == 'admin_main_menu')
+def show_admin_main_menu(call):
+    bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id, text='Добрый день.\nЭто админ панель бота', reply_markup=admin_keyboard())
+    bot.answer_callback_query(call.id, text="Вернуться в главное меню")
+
+
+
 # start + register user function open
 @bot.message_handler(commands=['start'])
 def welcome(message):
@@ -405,7 +509,7 @@ def welcome(message):
         return
     
     if user_id == ADMIN_ID:
-        bot.send_message(ADMIN_ID, 'Добрый день')
+        bot.send_message(ADMIN_ID, 'Добрый день.\nЭто админ панель бота', reply_markup=admin_keyboard())
     else:
         
         if db.user_exist(user_id):
@@ -416,6 +520,7 @@ def welcome(message):
             bot.send_message(user_id, f'Привет, {message.from_user.first_name}! Данный бот предназначен для укрепления знаний английского языка.')
             bot.send_message(user_id, 'Чтобы начать тест, пожалуйста, введите свои данные Имя|Фамилия|Группа:')
             bot.register_next_step_handler(message, welcome_handler)
+
 
 
 def welcome_handler(message):

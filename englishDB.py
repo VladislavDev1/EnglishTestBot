@@ -12,6 +12,7 @@ class Database:
             cursor = self.connection.cursor()
             cursor.execute("INSERT INTO `user` (`chat_id`, `name`, `status`, `correct_answers`, `incorrect_answers`, `test_count`, `correct_answers_json`) VALUES (?, ?, 0, 0, 0, 0, '{}')", (chat_id, name))
             self.connection.commit()
+            
 
     def get_user_name(self, chat_id):
         with self.lock:
@@ -24,7 +25,7 @@ class Database:
         with self.lock:
             cursor = self.connection.cursor()
             cursor.execute("UPDATE `user` SET `name` = ? WHERE `chat_id` = ?", (new_name, chat_id,))
-            self.connection.commit()
+                
 
     def get_user_by_id(self, user_id):
         with self.lock:
@@ -46,6 +47,7 @@ class Database:
             cursor = self.connection.cursor()
             cursor.execute("DELETE FROM `user` WHERE `chat_id` = ?", (user_id,))
             self.connection.commit()
+            
 
 
 
@@ -60,6 +62,7 @@ class Database:
             cursor = self.connection.cursor()
             cursor.execute("UPDATE `user` SET `status` = ? WHERE `chat_id` = ?", (status, chat_id,))
             self.connection.commit()
+            
 
     def get_status(self, chat_id):
         with self.lock:
@@ -73,30 +76,35 @@ class Database:
             cursor = self.connection.cursor()
             cursor.execute("UPDATE `user` SET `correct_answers` = 0, `incorrect_answers` = 0, `correct_answers_json` = '{}' WHERE `chat_id` = ?", (chat_id,))
             self.connection.commit()
+            
 
     def update_test_info(self, chat_id, correct_answers, incorrect_answers):
         with self.lock:
             cursor = self.connection.cursor()
             cursor.execute("UPDATE `user` SET `correct_answers` = ?, `incorrect_answers` = ? WHERE `chat_id` = ?", (correct_answers, incorrect_answers, chat_id))
             self.connection.commit()
+            
 
     def increment_correct_count(self, chat_id):
         with self.lock:
             cursor = self.connection.cursor()
             cursor.execute("UPDATE `user` SET `correct_answers` = `correct_answers` + 1 WHERE `chat_id` = ?", (chat_id,))
             self.connection.commit()
+            
 
     def increment_incorrect_count(self, chat_id):
         with self.lock:
             cursor = self.connection.cursor()
             cursor.execute("UPDATE `user` SET `incorrect_answers` = `incorrect_answers` + 1 WHERE `chat_id` = ?", (chat_id,))
             self.connection.commit()
+            
 
     def increment_test_count(self, chat_id):
         with self.lock:
             cursor = self.connection.cursor()
             cursor.execute("UPDATE `user` SET `test_count` = `test_count` + 1 WHERE `chat_id` = ?", (chat_id,))
             self.connection.commit()
+            
 
     def set_correct_answers(self, chat_id, correct_answers):
         with self.lock:
@@ -105,6 +113,7 @@ class Database:
             # print(f"Setting correct answers for chat_id {chat_id}: {correct_answers_json}")  # Отладочное сообщение
             cursor.execute("UPDATE `user` SET `correct_answers_json` = ? WHERE `chat_id` = ?", (correct_answers_json, chat_id))
             self.connection.commit()
+            
 
     def get_correct_answers(self, chat_id):
         with self.lock:
@@ -140,12 +149,32 @@ class Database:
             print(f"Ban check for user_id {user_id}: {result}")  # Отладочное сообщение
             return result[0] == 1 if result else False
 
-    def user_ban(self, user_id, ban=True):
+    def user_ban(self, user_id, name, ban=True, ):
         with self.lock:
             cursor = self.connection.cursor()
-            cursor.execute("INSERT INTO baned_users (`id`, `is_banned`) VALUES (?,?)", (user_id, 1 if ban else 0))
+            cursor.execute("INSERT INTO baned_users (`id`, `name`, `is_banned`) VALUES (?,?,?)", (user_id, name, 1 if ban else 0))
             self.connection.commit()
+            
 
+    def user_unban(self, user_id):
+        with self.lock:
+            cursor = self.connection.cursor()
+            cursor.execute("DELETE FROM baned_users WHERE id = ?", (user_id,))
+            self.connection.commit()
+            
+    def get_banned_users(self):
+        with self.lock:
+            cursor = self.connection.cursor()
+            cursor.execute("SELECT * FROM baned_users")
+            result = cursor.fetchall()
+            return result
+    
+    def get_banned_user_by_id(self, user_id):   
+        with self.lock:
+            cursor = self.connection.cursor()
+            cursor.execute("SELECT * FROM baned_users WHERE id = ?", (user_id,))
+            result = cursor.fetchone()
+            return result
     def set_group(self, chat_id, group):
         with self.lock:
             cursor = self.connection.cursor()
