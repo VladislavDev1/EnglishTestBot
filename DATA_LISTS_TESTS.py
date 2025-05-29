@@ -372,7 +372,7 @@ tests = {
     },
     168: {
         "question": "We haven’t got _____ food.",
-        "options": ["a", "an", "the", "-"],
+        "options": ["a", "an", "the", "any"],
         "answer": "any"
     },
     169: {
@@ -1718,7 +1718,7 @@ TEST3 = {
         "answer": "will be discussing"
     },
     285: {
-        "question": "I dinner when you me up.",
+        "question": "I ... dinner when you ... me up.",
         "options": ["has dinner/ring", "was having/rang", "have dinner/ring", "had dinner/ring"],
         "answer": "was having/rang"
     },
