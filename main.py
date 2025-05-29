@@ -79,12 +79,15 @@ def send_test_questions(chat_id, test_data):
     for i in random_test:
         question_details = test_data[i]
         answer = question_details["answer"]
-        options = question_details["options"]
+        options = question_details["options"][:]
 
         if answer not in options:
             bot.send_message(chat_id, f"Ошибка в вопросе: {question_details['question']}. Правильный ответ '{answer}' не найден в списке вариантов ответа.\nОтправьте данный тест в лс админу")
             continue
 
+
+        random.shuffle(options)  # Перемешиваем варианты ответов
+        
         correct_option_index = options.index(answer)
 
         poll_message = bot.send_poll(
