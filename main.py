@@ -12,7 +12,7 @@ import os
 
 
 # connect DB + create bot
-db = Database('english.db')
+db = Database('english2.db')
 bot = telebot.TeleBot(token=os.getenv('TOKEN'))
 bot.remove_webhook()
 ADMIN_ID = 964928426
@@ -87,7 +87,7 @@ def send_test_questions(chat_id, test_data):
 
 
         random.shuffle(options)  # Перемешиваем варианты ответов
-        
+
         correct_option_index = options.index(answer)
 
         poll_message = bot.send_poll(
