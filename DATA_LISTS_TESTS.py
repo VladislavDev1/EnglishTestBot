@@ -383,7 +383,7 @@ tests = {
     170: {
         "question": "We _____ got money.",
         "options": ["haven’t", "haven’t got", "hasn’t", "have"],
-        "answer": "haven’t"
+        "answer": "have"
     },
     171: {
         "question": "There are _____ people here.",
@@ -1758,7 +1758,7 @@ TEST5 ={
         },
         "323": {
             "question": "I ______ a fever but I ______ have sore throat.",
-            "options": ["A) have / don’t", "B) am / not", "C) don’t / got"],
+            "options": ["A) have / don’t", "B) am / not", "C) has / not", "D) do / not"],
             "answer": "A) have / don’t"
         },
         "324": {
