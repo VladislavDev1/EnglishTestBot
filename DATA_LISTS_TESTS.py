@@ -855,7 +855,7 @@ TEST3 = {
         "answer": "will be discussing"
     },
     285: {
-        "question": "I dinner when you me up.",
+        "question": " I .... dinner when you .... me up",
         "options": ["has dinner/ring", "was having/rang", "have dinner/ring", "had dinner/ring"],
         "answer": "was having/rang"
     },
@@ -1579,7 +1579,7 @@ TEST5 ={
         "287": {
             "question": "Tourists ______ visit museums.",
             "options": ["A) often", "B) seldom", "C) never", "D) rarely"],
-            "answer": "B) seldom"
+            "answer": "A) often"
         },
         "288": {
             "question": "The sun is ______ hot.",
@@ -1794,7 +1794,7 @@ TEST5 ={
         "351": {
             "question": "My desk is a .........; I should clean it.",
             "options": ["messy", "slob", "mess", "sloppy"],
-            "answer": "mess"
+            "answer": "sloppy"
         },
         "352": {
             "question": "Valerie spilled water ......... my paperwork.",
@@ -1807,7 +1807,7 @@ TEST5 ={
             "answer": "out"
         },
         "354": {
-            "question": "I li   ke pencils ......... than pens.",
+            "question": "I like pencils ......... than pen.",
             "options": ["best", "the best", "better", "more good"],
             "answer": "better"
         },
