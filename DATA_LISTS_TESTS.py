@@ -1749,7 +1749,7 @@ TEST5 ={
         "321": {
             "question": "______ they have an old car?",
             "options": ["A) Are", "B) Aren’t", "C) Have", "D) Do"],
-            "answer": "C) Have"
+            "answer": "A) Are"
         },
         "322": {
             "question": "A: What is wrong with Lisa?\nB: She ______ a fever.",
