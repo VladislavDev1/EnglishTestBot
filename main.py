@@ -8,6 +8,8 @@ from telebot import types
 from keyboards import admin_keyboard
 import os
 
+from dotenv import load_dotenv
+load_dotenv()
 
 
 
