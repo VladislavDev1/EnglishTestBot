@@ -1827,7 +1827,7 @@ TEST5 ={
             "answer": "most difficult"
         },
         "358": {
-            "question": "My boss is very ..........\nnicer\nnice\nnicest\nmuch nice",
+            "question": "My boss is very .......",
             "options": ["nicer", "nice", "nicest", "much nice"],
             "answer": "nice"
         },
