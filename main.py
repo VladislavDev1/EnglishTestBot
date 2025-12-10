@@ -7,11 +7,11 @@ from time import sleep
 from telebot import types
 from keyboards import admin_keyboard
 import os
-
+from keep_alive import keep_alive
 from dotenv import load_dotenv
 load_dotenv()
 
-
+keep_alive()
 
 # connect DB + create bot
 db = Database('english2.db')
