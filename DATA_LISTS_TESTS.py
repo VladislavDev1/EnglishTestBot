@@ -1852,9 +1852,9 @@ TEST5 ={
             "answer": "by"
         },
         "363": {
-            "question": "Do you like sushi? No, I ..........\ndon't like\ndon't\nare not",
+            "question": "Do you like sushi? No, I ..........",
             "options": ["don't like", "don't", "are not"],
-            "answer": "don't like"
+            "answer": "don't"
         },
         "364": {
             "question": "Has anyone seen Laura? ......... to work today?\nIs she coming\nDoes she come\nShe come",
