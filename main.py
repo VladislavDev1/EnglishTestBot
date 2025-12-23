@@ -15,7 +15,7 @@ keep_alive()
 
 # connect DB + create bot
 db = Database('english2.db')
-bot = telebot.TeleBot(token=os.getenv('TOKEN'))
+bot = telebot.TeleBot(token='6811304180:AAEP8sZtqEOBl7f1PfaSFIfi0YFg_X7L2Os')
 bot.remove_webhook()
 ADMIN_ID = 964928426
 
