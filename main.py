@@ -6,7 +6,6 @@ from DATA_LISTS_TESTS import tests, TEST2, TEST3, TEST4, TEST5
 from time import sleep
 from telebot import types
 from keyboards import admin_keyboard
-import os
 from keep_alive import keep_alive
 from dotenv import load_dotenv
 load_dotenv()
@@ -15,7 +14,7 @@ keep_alive()
 
 # connect DB + create bot
 db = Database('english2.db')
-bot = telebot.TeleBot(token='6811304180:AAEP8sZtqEOBl7f1PfaSFIfi0YFg_X7L2Os')
+bot = telebot.TeleBot(token='8613671310:AAGEP02c7hzk9kWRO5cacpi4p49xprbT6Vk')
 bot.remove_webhook()
 ADMIN_ID = 964928426
 
