@@ -6,7 +6,6 @@ from DATA_LISTS_TESTS import tests, TEST2, TEST3, TEST4, TEST5
 from time import sleep
 from telebot import types
 from keyboards import admin_keyboard
-import os
 from keep_alive import keep_alive
 from dotenv import load_dotenv
 load_dotenv()
@@ -15,9 +14,9 @@ keep_alive()
 
 # connect DB + create bot
 db = Database('english2.db')
-bot = telebot.TeleBot(token='8613671310:AAGEP02c7hzk9kWRO5cacpi4p49xprbT6Vk')
+bot = telebot.TeleBot(token='7654585303:AAF4PLGIngtvFrWEDB6utX0Q4Zy_kNSAygI')
 bot.remove_webhook()
-ADMIN_ID = 964928426
+ADMIN_ID = 610691463
 
 test_mapping = {
     1: (TEST2, 2),
@@ -39,7 +38,7 @@ def check_ban_status(user_id):
 @bot.message_handler(commands=['tests'])
 def starting_test(message):
     user_id = message.chat.id
-
+    bot.send_message(ADMIN_ID, f"Пользователь {db.get_user_name(user_id)} начал тестирование")
     # проверка бана
     if check_ban_status(user_id):
         return
