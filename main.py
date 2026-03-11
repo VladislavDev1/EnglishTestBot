@@ -14,9 +14,9 @@ keep_alive()
 
 # connect DB + create bot
 db = Database('english2.db')
-bot = telebot.TeleBot(token='7654585303:AAF4PLGIngtvFrWEDB6utX0Q4Zy_kNSAygI')
+bot = telebot.TeleBot(token='8613671310:AAGEP02c7hzk9kWRO5cacpi4p49xprbT6Vk')
 bot.remove_webhook()
-ADMIN_ID = 610691463
+ADMIN_ID = 964928426
 
 test_mapping = {
     1: (TEST2, 2),
