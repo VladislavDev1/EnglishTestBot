@@ -8,15 +8,16 @@ from telebot import types
 from keyboards import admin_keyboard
 from keep_alive import keep_alive
 from dotenv import load_dotenv
+import os
 load_dotenv()
 
 keep_alive()
 
 # connect DB + create bot
 db = Database('english2.db')
-bot = telebot.TeleBot(token='7654585303:AAF4PLGIngtvFrWEDB6utX0Q4Zy_kNSAygI')
+bot = telebot.TeleBot(token=os.getenv('TOKEN'))
 bot.remove_webhook()
-ADMIN_ID = 610691463
+ADMIN_ID = int(os.getenv('ADMIN_ID'))
 
 test_mapping = {
     1: (TEST2, 2),
@@ -24,7 +25,6 @@ test_mapping = {
     3: (TEST4, 4),
     4: (TEST5, 5)
 }
-
 
 
 # проверка бана
