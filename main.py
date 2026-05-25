@@ -1,23 +1,28 @@
 import random
 import telebot
 from englishDB import Database
-from DATA_LISTS_TESTS import tests, TEST2, TEST3, TEST4, TEST5
+import importlib
+module = importlib.import_module("DATA_LISTS_TESTS (transport)")
+TEST2 = module.TEST2
+TEST3 = module.TEST3
+TEST4 = module.TEST4
+TEST5 = module.TEST5
+# from DATA_LISTS_TESTS (transport) import TEST2, TEST3, TEST4, TEST5
 # from config import TOKEN, ADMIN_ID
 from time import sleep
 from telebot import types
 from keyboards import admin_keyboard
 from keep_alive import keep_alive
 from dotenv import load_dotenv
-import os
 load_dotenv()
 
 keep_alive()
 
 # connect DB + create bot
 db = Database('english2.db')
-bot = telebot.TeleBot(token=os.getenv('TOKEN'))
+bot = telebot.TeleBot(token='7719431350:AAH2qtVxXWuYi89IbzBHuFPNV-XxMZRXJKM')
 bot.remove_webhook()
-ADMIN_ID = int(os.getenv('ADMIN_ID'))
+ADMIN_ID = 964928426
 
 test_mapping = {
     1: (TEST2, 2),
@@ -25,7 +30,6 @@ test_mapping = {
     3: (TEST4, 4),
     4: (TEST5, 5)
 }
-
 
 # проверка бана
 def check_ban_status(user_id):
