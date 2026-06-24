@@ -1,5 +1,5 @@
 import random
-import importlib
+# import importlib
 import time
 from aiogram import Router, F
 from aiogram.types import Message, ReplyKeyboardMarkup, KeyboardButton
@@ -12,15 +12,15 @@ from utils.feedback import get_final_feedback
 from logger_config import logger
 from config import TOTAL_STAGES, ADMIN_ID
 
-module = importlib.import_module("DATA_LISTS_TESTS (transport)")
-tests = module.tests
-TEST2 = module.TEST2
-TEST3 = module.TEST3
-TEST4 = module.TEST4
-TEST5 = module.TEST5
+# module = importlib.import_module("DATA_LISTS_TESTS (transport)")
+# tests = module.tests
+# TEST2 = module.TEST2
+# TEST3 = module.TEST3
+# TEST4 = module.TEST4
+# TEST5 = module.TEST5
 
 # Импортируем test data
-# from DATA_LISTS_TESTS import TEST2, TEST3, TEST4, TEST5, tests
+from DATA_LISTS_TESTS import TEST2, TEST3, TEST4, TEST5, tests
 
 user_router = Router()
 
