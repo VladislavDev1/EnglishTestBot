@@ -372,7 +372,7 @@ tests = {
     },
     168: {
         "question": "We haven’t got _____ food.",
-        "options": ["a", "an", "the", "-"],
+        "options": ["a", "an", "the", "any"],
         "answer": "any"
     },
     169: {
@@ -691,7 +691,7 @@ TEST3 = {
     },
     252: {
         "question": "They ____________late yesterday, …?",
-        "options": ["returned/are they", "returned/are they", "returns/doesn’t he", "return/don’t they"],
+        "options": ["returned/are they", "returned/are they", "returns/doesn’t he", "returned/didn’t they"],
         "answer": "returned/didn’t they"
     },
     253: {
