@@ -9,7 +9,7 @@ from config import BOT_TOKEN, ADMIN_ID
 from logger_config import logger
 from utils.commands import USER_COMMANDS, ADMIN_COMMANDS
 
-import keep_alive from keep_alive
+from keep_alive import keep_alive 
 
 # Import all routers
 from handlers import user_router, text_router, poll_router, admin_commands_router
