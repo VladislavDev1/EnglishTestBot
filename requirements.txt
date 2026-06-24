@@ -1,6 +1,4 @@
 dotenv
 flask
 aiogram==3.4.1
-pydantic==2.8.0
-pydantic-core==2.8.0
 python-dotenv==1.0.0
