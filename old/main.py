@@ -3,7 +3,7 @@ import random
 import logging
 import telebot
 from englishDB import Database
-from DATA_LISTS_TESTS import TEST2, TEST3, TEST4, TEST5, tests
+from DATA_LISTS_MAIN import TEST2, TEST3, TEST4, TEST5, tests
 from time import sleep
 from telebot import types
 from keyboards import admin_keyboard

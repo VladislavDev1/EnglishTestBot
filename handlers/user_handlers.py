@@ -20,7 +20,7 @@ from config import TOTAL_STAGES, ADMIN_ID
 # TEST5 = module.TEST5
 
 # Импортируем test data
-from DATA_LISTS_TESTS import TEST2, TEST3, TEST4, TEST5, tests
+from DATA_LISTS_LAW_STUDENT import TEST1, TEST2, TEST3, TEST4, TEST5
 
 user_router = Router()
 
@@ -29,7 +29,7 @@ LAST_NEXT_CALL: dict[int, float] = {}
 
 # Этапы тестов
 STAGE_TESTS = {
-    1: tests,
+    1: TEST1,
     2: TEST2,
     3: TEST3,
     4: TEST4,
@@ -231,7 +231,7 @@ async def cmd_tests(message: Message):
     if not db.compare_and_set_status(user_id, current_status, 1):
         await message.answer("⚠️ Действие уже выполняется или было выполнено. Попробуйте снова.")
         return
-    await send_stage(message, tests)
+    await send_stage(message, TEST1)
     
     user_name = db.get_user_name(user_id)
     await notify_admin(None, f"👤 {user_name} начал тестирование")
