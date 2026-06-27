@@ -20,7 +20,7 @@ from config import TOTAL_STAGES, ADMIN_ID
 # TEST5 = module.TEST5
 
 # Импортируем test data
-from DATA_LISTS_LAW_STUDENT import TEST1, TEST2, TEST3, TEST4, TEST5
+from DATA_LISTS_MAIN import TEST1, TEST2, TEST3, TEST4, TEST5
 
 user_router = Router()
 

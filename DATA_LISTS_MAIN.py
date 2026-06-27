@@ -1,5 +1,5 @@
 # Создаем словарь для хранения вопросов и ответов
-tests = {
+TEST1 = {
     94: {
         "question": "Which of the following is a countable noun?",
         "options": ["chair", "music", "air", "oil"],
